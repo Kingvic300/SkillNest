@@ -44,7 +44,7 @@ public class UserServiceImplTest {
         createUserRequest.setPhoneNumber("08144782521");
         createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
-        assertNotNull(createdUserResponse.getJwtToken());
+        assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
     }
     @Test
@@ -58,7 +58,7 @@ public class UserServiceImplTest {
         createUserRequest.setPhoneNumber("08144782521");
         createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
-        assertNotNull(createdUserResponse.getJwtToken());
+        assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
 
         LoginRequest loginRequest = new LoginRequest();
@@ -81,7 +81,7 @@ public class UserServiceImplTest {
         createUserRequest.setPhoneNumber("08144782521");
         createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
-        assertNotNull(createdUserResponse.getJwtToken());
+        assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
 
         LoginRequest loginRequest = new LoginRequest();
@@ -149,7 +149,7 @@ public class UserServiceImplTest {
         createUserRequest.setPhoneNumber("08144782521");
         createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
-        assertNotNull(createdUserResponse.getJwtToken());
+        assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
 
         LoginRequest loginRequest = new LoginRequest();

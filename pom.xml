@@ -30,18 +30,17 @@
     </parent>
 
     <properties>
-        <java.version>24</java.version> <!-- Use Java 17 for max compatibility -->
+        <java.version>22</java.version> <!-- Use Java 17 for max compatibility -->
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
-                <version>1.18.38</version>
-                <scope>provided</scope>
+               <optional>true</optional>
             </dependency>
+
             <!-- https://mvnrepository.com/artifact/org.springframework/spring-test -->
             <dependency>
                 <groupId>org.springframework</groupId>

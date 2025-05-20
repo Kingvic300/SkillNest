@@ -13,6 +13,6 @@ public class Employer extends User {
 
     private String companyName;
     private String companyDescription;
-//    private List<String> postedJobIds;
+    private List<String> postedJobIds;
     private String walletId;
 }

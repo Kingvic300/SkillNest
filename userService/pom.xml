@@ -126,7 +126,7 @@
                 <configuration>
                     <annotationProcessorPaths>
                         <path>
-                            <groupId>org.projectlombok</groupId>
+                            <groupId>org.project lombok</groupId>
                             <artifactId>lombok</artifactId>
                         </path>
                     </annotationProcessorPaths>
@@ -138,7 +138,7 @@
                 <configuration>
                     <excludes>
                         <exclude>
-                            <groupId>org.projectlombok</groupId>
+                            <groupId>org.project lombok</groupId>
                             <artifactId>lombok</artifactId>
                         </exclude>
                     </excludes>

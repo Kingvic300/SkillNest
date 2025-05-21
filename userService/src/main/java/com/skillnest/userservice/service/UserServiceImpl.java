@@ -7,6 +7,7 @@ import com.skillnest.userservice.data.repositories.UserRepository;
 import com.skillnest.userservice.dtos.request.*;
 import com.skillnest.userservice.dtos.response.*;
 import com.skillnest.userservice.exception.*;
+import com.skillnest.userservice.mapper.OTPMapper;
 import com.skillnest.userservice.mapper.UserMapper;
 import com.skillnest.userservice.util.JwtUtil;
 import com.skillnest.userservice.util.OTPGenerator;
@@ -38,9 +39,19 @@ public class UserServiceImpl implements UserService{
 
     @Override
     public CreatedUserResponse register(CreateUserRequest createUserRequest) {
+        OTP otp = otpRepository.findByEmail(createUserRequest.getEmail())
+                .orElseThrow(() -> new InvalidOtpException("OTP not found for email"));
+
+        if (!otp.getOtp().equals(createUserRequest.getOtp())) {
+            throw new InvalidOtpException("Invalid OTP");
+        }
+        if (otp.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
+            throw new OtpExpiredException("OTP has expired");
+        }
         if(userRepository.existsByUsername(createUserRequest.getUsername())){
             throw new AlreadyExistsException("Username already exists");
         }
+
         if(userRepository.existsByEmail(createUserRequest.getEmail())){
             throw new AlreadyExistsException("Email already exists");
         }
@@ -48,17 +59,21 @@ public class UserServiceImpl implements UserService{
         String encryptedPassword = passwordEncoder.encode(createUserRequest.getPassword());
         user.setPassword(encryptedPassword);
         userRepository.save(user);
-
-        OTP otp = new OTP();
-        otp.setId(UUID.randomUUID().toString());
-        otp.setOtp(OTPGenerator.generateOtp());
-        otp.setEmail(createUserRequest.getEmail());
-        otp.setExpiresAt(LocalDateTime.now().plusMinutes(30));
-        otpRepository.save(otp);
-        emailService.sendEmail(createUserRequest.getEmail(), otp.getOtp());
+        otpRepository.delete(otp);
         return UserMapper.mapToCreatedUserResponse(user, "User Created Successfully");
     }
 
+    @Override
+    public void sendEmailValidationOTP(String email) {
+        if (otpRepository.existsByEmail(email)) {
+            otpRepository.deleteByEmail(email);
+        }
+        OTP otp = OTPMapper.mapToOTP(email);
+        otpRepository.save(otp);
+        emailService.sendEmail(email, otp.getOtp());
+        OTPMapper.mapToOTPResponse("OTP sent successfully", otp.getId());
+
+    }
     @Override
     public LoginResponse login(LoginRequest loginRequest){
         try {
@@ -129,7 +144,7 @@ public class UserServiceImpl implements UserService{
         return UserMapper.mapToResetPasswordResponse("Password reset successful", otp.getOtp());
     }
     @Override
-    public ResetPasswordResponse sendResetOtp(ResetPasswordRequest resetPasswordRequest){
+    public void sendResetOtp(ResetPasswordRequest resetPasswordRequest){
         Optional<User> user = userRepository.findByEmail(resetPasswordRequest.getEmail());
         if (user.isEmpty()) {
             throw new UserNotFoundException("User not found");
@@ -141,6 +156,6 @@ public class UserServiceImpl implements UserService{
         otp.setExpiresAt(LocalDateTime.now().plusMinutes(30));
         otpRepository.save(otp);
         emailService.sendResetPasswordEmail(resetPasswordRequest.getEmail(), otp.getOtp());
-        return UserMapper.mapToResetPasswordResponse("Email sent Successfully", otp.getOtp());
+        UserMapper.mapToResetPasswordResponse("Email sent Successfully", otp.getOtp());
     }
 }

@@ -1,15 +1,13 @@
 package com.skillnest.userservice.service;
 
 import com.skillnest.userservice.dtos.request.*;
-import com.skillnest.userservice.dtos.response.CreatedUserResponse;
-import com.skillnest.userservice.dtos.response.LoginResponse;
-import com.skillnest.userservice.dtos.response.ResetPasswordResponse;
-import com.skillnest.userservice.dtos.response.UpdateUserProfileResponse;
+import com.skillnest.userservice.dtos.response.*;
 
 public interface UserService {
     CreatedUserResponse register(CreateUserRequest createUserRequest);
+    void sendEmailValidationOTP(String email);
     LoginResponse login(LoginRequest loginResponse);
     UpdateUserProfileResponse updateProfile(UpdateUserProfileRequest updateUserProfileRequest);
     ResetPasswordResponse resetPassword(ChangePasswordRequest changePasswordRequest);
-    ResetPasswordResponse sendResetOtp(ResetPasswordRequest resetPasswordRequest);
+    void sendResetOtp(ResetPasswordRequest resetPasswordRequest);
 }

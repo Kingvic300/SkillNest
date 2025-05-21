@@ -10,6 +10,7 @@ public class CreateUserRequest {
     private String password;
     private String email;
     private String phoneNumber;
+    private String otp;
     private String location;
     private boolean isActive;
 }

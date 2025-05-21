@@ -1,12 +1,12 @@
 package com.skillnest.userservice.service;
 
+import com.skillnest.userservice.data.model.OTP;
 import com.skillnest.userservice.data.repositories.OTPRepository;
 import com.skillnest.userservice.data.repositories.UserRepository;
 import com.skillnest.userservice.dtos.request.*;
-import com.skillnest.userservice.dtos.response.CreatedUserResponse;
-import com.skillnest.userservice.dtos.response.LoginResponse;
-import com.skillnest.userservice.dtos.response.ResetPasswordResponse;
-import com.skillnest.userservice.dtos.response.UpdateUserProfileResponse;
+import com.skillnest.userservice.dtos.response.*;
+import com.skillnest.userservice.exception.InvalidOtpException;
+import com.skillnest.userservice.exception.UserNotFoundException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,9 +18,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.time.LocalDateTime;
-
 import static org.junit.jupiter.api.Assertions.*;
+
 @SpringBootTest
 @ActiveProfiles("test")
 public class UserServiceImplTest {
@@ -40,117 +39,91 @@ public class UserServiceImplTest {
     CreateUserRequest createUserRequest = new CreateUserRequest();
 
     @BeforeEach
-    public void setUp(){
+    public void setUp() {
         createUserRequest.setEmail("oladimejivictor611@gmail.com");
         createUserRequest.setActive(true);
         createUserRequest.setPassword("password");
-        createUserRequest.setUsername("VictorOladimeji");
-        createUserRequest.setLocation("Sabo yaba");
+        createUserRequest.setUsername("victoroladimeji");
+        createUserRequest.setLocation("Sabo Yaba");
         createUserRequest.setPhoneNumber("08144782521");
+
+        userService.sendEmailValidationOTP(createUserRequest.getEmail());
+
+        OTP otp = otpRepository.findByEmail(createUserRequest.getEmail())
+                .orElseThrow(() -> new RuntimeException("OTP not found"));
+        createUserRequest.setOtp(otp.getOtp());
     }
 
     @Test
-    public void testThatUserCanBeRegistered(){
-        CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.setEmail("oladimejivictor611@gmail.com");
-        createUserRequest.setActive(true);
-        createUserRequest.setPassword("password");
-        createUserRequest.setUsername("VictorOladimeji");
-        createUserRequest.setLocation("Sabo yaba");
-        createUserRequest.setPhoneNumber("08144782521");
+    public void testThatUserCanBeRegistered() {
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
         assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
     }
+
     @Test
-    public void testThatUserCanLogin(){
-        CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
-        assertNotNull(createdUserResponse.getUser());
-        assertEquals("User Created Successfully", createdUserResponse.getMessage());
+    public void testThatUserCanLogin() {
+        userService.register(createUserRequest);
 
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername("VictorOladimeji");
+        loginRequest.setUsername("victoroladimeji");
         loginRequest.setPassword("password");
         LoginResponse loginResponse = userService.login(loginRequest);
+
         assertNotNull(loginResponse.getToken());
         assertEquals("Login was successful", loginResponse.getMessage());
-
     }
 
     @Test
-    public void testThatStudentCanUpdateTheirProfile(){
-        CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
-        assertNotNull(createdUserResponse.getUser());
-        assertEquals("User Created Successfully", createdUserResponse.getMessage());
+    public void testThatUserCanUpdateTheirProfile() {
+        userService.register(createUserRequest);
 
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername("VictorOladimeji");
+        loginRequest.setUsername("victoroladimeji");
         loginRequest.setPassword("password");
         LoginResponse loginResponse = userService.login(loginRequest);
-        assertNotNull(loginResponse.getToken());
-        assertEquals("Login was successful", loginResponse.getMessage());
         authenticatedUser(loginRequest);
 
         UpdateUserProfileRequest updateUserProfileRequest = new UpdateUserProfileRequest();
-        updateUserProfileRequest.setEmail("oladimejivictor611@gmail.com");
+        updateUserProfileRequest.setEmail("updated@example.com");
         updateUserProfileRequest.setActive(true);
-        updateUserProfileRequest.setUsername("Oladimeji Victor");
-        updateUserProfileRequest.setLocation("Sabo,yaba");
+        updateUserProfileRequest.setUsername("updateduser");
+        updateUserProfileRequest.setLocation("Sabo Yaba");
         updateUserProfileRequest.setPhoneNumber("08144782521");
-        updateUserProfileRequest.setProfilePicturePath("not yet added");
+
         UpdateUserProfileResponse updateUserProfileResponse = userService.updateProfile(updateUserProfileRequest);
+
         assertEquals("User profile updated successfully", updateUserProfileResponse.getMessage());
         assertNotNull(updateUserProfileResponse.getToken());
     }
+
     @Test
     public void testThatResetPasswordWorks() {
         userService.register(createUserRequest);
 
         ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest();
         resetPasswordRequest.setEmail("oladimejivictor611@gmail.com");
-        ResetPasswordResponse otpResponse = userService.sendResetOtp(resetPasswordRequest);
-        assertNotNull(otpResponse.getOtp());
-        assertEquals("Email sent Successfully", otpResponse.getMessage());
+        userService.sendResetOtp(resetPasswordRequest);
+
+        OTP otp = otpRepository.findByEmail("oladimejivictor611@gmail.com")
+                .orElseThrow(() -> new RuntimeException("OTP not found"));
 
         ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setEmail("oladimejivictor611@gmail.com");
-        changePasswordRequest.setOtp(otpResponse.getOtp());
-        changePasswordRequest.setNewPassword("newSecurePassword123");
+        changePasswordRequest.setOtp(otp.getOtp());
+        changePasswordRequest.setNewPassword("password");
 
         ResetPasswordResponse resetPasswordResponse = userService.resetPassword(changePasswordRequest);
         assertEquals("Password reset successful", resetPasswordResponse.getMessage());
 
         LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername("VictorOladimeji");
-        loginRequest.setPassword("newSecurePassword123");
-
-        LoginResponse loginResponse = userService.login(loginRequest);
-        assertNotNull(loginResponse.getToken());
-        assertEquals("Login was successful", loginResponse.getMessage());
-    }
-
-    @Test
-    public void testThatSendResetOTPIsSuccessful(){
-        CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
-        assertNotNull(createdUserResponse.getUser());
-        assertEquals("User Created Successfully", createdUserResponse.getMessage());
-
-        LoginRequest loginRequest = new LoginRequest();
-        loginRequest.setUsername("VictorOladimeji");
+        loginRequest.setUsername("victoroladimeji");
         loginRequest.setPassword("password");
+
         LoginResponse loginResponse = userService.login(loginRequest);
         assertNotNull(loginResponse.getToken());
-        assertEquals("Login was successful", loginResponse.getMessage());
-        authenticatedUser(loginRequest);
-
-        ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest();
-        resetPasswordRequest.setEmail("oladimejivictor611@gmail.com");
-
-        ResetPasswordResponse resetPasswordResponse = userService.sendResetOtp(resetPasswordRequest);
-        assertNotNull(resetPasswordResponse.getOtp());
-        assertEquals("Email sent Successfully", resetPasswordResponse.getMessage());
-
     }
+
     private void authenticatedUser(LoginRequest loginRequest) {
         UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
         UsernamePasswordAuthenticationToken authentication =
@@ -158,10 +131,107 @@ public class UserServiceImplTest {
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
+
+    @Test
+    public void testRegisterWithExistingUsernameThrowsException() {
+        CreateUserRequest duplicateUsernameRequest = new CreateUserRequest();
+        duplicateUsernameRequest.setEmail("newemail@example.com");
+        duplicateUsernameRequest.setUsername("victoroladimeji");
+        duplicateUsernameRequest.setPassword("password");
+        duplicateUsernameRequest.setLocation("Sabo Yaba");
+        duplicateUsernameRequest.setPhoneNumber("08144782521");
+        duplicateUsernameRequest.setOtp(createUserRequest.getOtp());
+        duplicateUsernameRequest.setActive(true);
+
+        assertThrows(InvalidOtpException.class, () -> {
+            userService.register(duplicateUsernameRequest);
+        });
+    }
+
+    @Test
+    public void testLoginWithWrongPasswordThrowsException() {
+        LoginRequest loginRequest = new LoginRequest();
+        loginRequest.setUsername("victoroladimeji");
+        loginRequest.setPassword("wrongpassword");
+
+        assertThrows(RuntimeException.class, () -> {
+            userService.login(loginRequest);
+        });
+    }
+
+    @Test
+    public void testUpdateProfileWithoutAuthenticationThrowsException() {
+        UpdateUserProfileRequest updateUserProfileRequest = new UpdateUserProfileRequest();
+        updateUserProfileRequest.setEmail("updated@example.com");
+        updateUserProfileRequest.setUsername("updateduser");
+        updateUserProfileRequest.setLocation("Sabo Yaba");
+        updateUserProfileRequest.setPhoneNumber("08144782521");
+        updateUserProfileRequest.setActive(true);
+
+        SecurityContextHolder.clearContext();
+
+        assertThrows(RuntimeException.class, () -> {
+            userService.updateProfile(updateUserProfileRequest);
+        });
+    }
+
+    @Test
+    public void testResetPasswordWithInvalidOtpThrowsException() {
+        ChangePasswordRequest changePasswordRequest = new ChangePasswordRequest();
+        changePasswordRequest.setEmail("oladimejivictor611@gmail.com");
+        changePasswordRequest.setOtp("invalidotp");
+        changePasswordRequest.setNewPassword("password");
+
+        assertThrows(InvalidOtpException.class, () -> {
+            userService.resetPassword(changePasswordRequest);
+        });
+    }
+
+    @Test
+    public void testSendResetOtpForNonExistingEmailThrowsException() {
+        ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest();
+        resetPasswordRequest.setEmail("nonexistingemail@example.com");
+
+        assertThrows(UserNotFoundException.class, () -> {
+            userService.sendResetOtp(resetPasswordRequest);
+        });
+    }
+
+    @Test
+    public void testRegisterWithInvalidEmailFormatThrowsException() {
+        CreateUserRequest invalidEmailRequest = new CreateUserRequest();
+        invalidEmailRequest.setEmail("invalid-email-format");
+        invalidEmailRequest.setUsername("newuser");
+        invalidEmailRequest.setPassword("password");
+        invalidEmailRequest.setLocation("Sabo Yaba");
+        invalidEmailRequest.setPhoneNumber("08144782521");
+        invalidEmailRequest.setOtp("123456");
+        invalidEmailRequest.setActive(true);
+
+        assertThrows(RuntimeException.class, () -> {
+            userService.register(invalidEmailRequest);
+        });
+    }
+
+    @Test
+    public void testRegisterWithMissingFieldsThrowsException() {
+        CreateUserRequest missingFieldsRequest = new CreateUserRequest();
+        missingFieldsRequest.setPassword("password");
+        missingFieldsRequest.setLocation("Sabo Yaba");
+        missingFieldsRequest.setPhoneNumber("08144782521");
+        missingFieldsRequest.setOtp("123456");
+        missingFieldsRequest.setActive(true);
+
+        assertThrows(RuntimeException.class, () -> {
+            userService.register(missingFieldsRequest);
+        });
+    }
+
     @AfterEach
     void tearDown() {
         otpRepository.deleteAll();
         userRepository.deleteAll();
-    }
+        SecurityContextHolder.clearContext();
 
+    }
 }

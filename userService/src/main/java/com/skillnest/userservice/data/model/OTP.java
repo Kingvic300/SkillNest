@@ -14,5 +14,6 @@ public class OTP {
     private String id;
     private String otp;
     private String email;
+    private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
 }

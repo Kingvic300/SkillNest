@@ -9,4 +9,12 @@ import java.util.Optional;
 @Repository
 public interface OTPRepository extends MongoRepository<OTP, String> {
     Optional<OTP> findByEmailAndOtp(String email, String otp);
+
+    boolean existsByOtp(String otp);
+
+    Optional<OTP> findByEmail(String email);
+
+    boolean existsByEmail(String email);
+
+    void deleteByEmail(String email);
 }

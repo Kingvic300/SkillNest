@@ -24,7 +24,6 @@ public class UserMapper {
         user.setRole(Role.USER);
         user.setLocation(createUserRequest.getLocation());
         user.setRegistrationDate(LocalDateTime.now());
-        user.setProfilePicturePath(createUserRequest.getProfilePicturePath());
         user.setActive(true);
         return user;
     }

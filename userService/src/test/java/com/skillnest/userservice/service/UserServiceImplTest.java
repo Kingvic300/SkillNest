@@ -1,5 +1,6 @@
 package com.skillnest.userservice.service;
 
+import com.skillnest.userservice.data.repositories.OTPRepository;
 import com.skillnest.userservice.data.repositories.UserRepository;
 import com.skillnest.userservice.dtos.request.*;
 import com.skillnest.userservice.dtos.response.CreatedUserResponse;
@@ -7,6 +8,7 @@ import com.skillnest.userservice.dtos.response.LoginResponse;
 import com.skillnest.userservice.dtos.response.ResetPasswordResponse;
 import com.skillnest.userservice.dtos.response.UpdateUserProfileResponse;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -30,8 +32,22 @@ public class UserServiceImplTest {
     private UserRepository userRepository;
 
     @Autowired
+    private OTPRepository otpRepository;
+
+    @Autowired
     private UserDetailsService userDetailsService;
 
+    CreateUserRequest createUserRequest = new CreateUserRequest();
+
+    @BeforeEach
+    public void setUp(){
+        createUserRequest.setEmail("oladimejivictor611@gmail.com");
+        createUserRequest.setActive(true);
+        createUserRequest.setPassword("password");
+        createUserRequest.setUsername("VictorOladimeji");
+        createUserRequest.setLocation("Sabo yaba");
+        createUserRequest.setPhoneNumber("08144782521");
+    }
 
     @Test
     public void testThatUserCanBeRegistered(){
@@ -42,21 +58,12 @@ public class UserServiceImplTest {
         createUserRequest.setUsername("VictorOladimeji");
         createUserRequest.setLocation("Sabo yaba");
         createUserRequest.setPhoneNumber("08144782521");
-        createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
         assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
     }
     @Test
     public void testThatUserCanLogin(){
-        CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.setEmail("oladimejivictor611@gmail.com");
-        createUserRequest.setActive(true);
-        createUserRequest.setPassword("password");
-        createUserRequest.setUsername("VictorOladimeji");
-        createUserRequest.setLocation("Sabo yaba");
-        createUserRequest.setPhoneNumber("08144782521");
-        createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
         assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
@@ -72,14 +79,6 @@ public class UserServiceImplTest {
 
     @Test
     public void testThatStudentCanUpdateTheirProfile(){
-        CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.setEmail("oladimejivictor611@gmail.com");
-        createUserRequest.setActive(true);
-        createUserRequest.setPassword("password");
-        createUserRequest.setUsername("VictorOladimeji");
-        createUserRequest.setLocation("Sabo yaba");
-        createUserRequest.setPhoneNumber("08144782521");
-        createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
         assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
@@ -105,14 +104,6 @@ public class UserServiceImplTest {
     }
     @Test
     public void testThatResetPasswordWorks() {
-        CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.setEmail("oladimejivictor611@gmail.com");
-        createUserRequest.setActive(true);
-        createUserRequest.setPassword("password");
-        createUserRequest.setUsername("VictorOladimeji");
-        createUserRequest.setLocation("Sabo yaba");
-        createUserRequest.setPhoneNumber("08144782521");
-        createUserRequest.setProfilePicturePath("not yet added");
         userService.register(createUserRequest);
 
         ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest();
@@ -140,14 +131,6 @@ public class UserServiceImplTest {
 
     @Test
     public void testThatSendResetOTPIsSuccessful(){
-        CreateUserRequest createUserRequest = new CreateUserRequest();
-        createUserRequest.setEmail("oladimejivictor611@gmail.com");
-        createUserRequest.setActive(true);
-        createUserRequest.setPassword("password");
-        createUserRequest.setUsername("VictorOladimeji");
-        createUserRequest.setLocation("Sabo yaba");
-        createUserRequest.setPhoneNumber("08144782521");
-        createUserRequest.setProfilePicturePath("not yet added");
         CreatedUserResponse createdUserResponse = userService.register(createUserRequest);
         assertNotNull(createdUserResponse.getUser());
         assertEquals("User Created Successfully", createdUserResponse.getMessage());
@@ -177,6 +160,7 @@ public class UserServiceImplTest {
 
     @AfterEach
     void tearDown() {
+        otpRepository.deleteAll();
         userRepository.deleteAll();
     }
 

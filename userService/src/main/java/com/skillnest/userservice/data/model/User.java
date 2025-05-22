@@ -22,7 +22,7 @@ import java.util.List;
 public class User implements UserDetails{
     @Id
     private String id;
-
+    private String fullName;
     private String username;
     private String password;
     private String email;
@@ -31,6 +31,7 @@ public class User implements UserDetails{
     private LocalDateTime registrationDate;
     private String location;
     private boolean isActive;
+    private boolean verified = false;
     private Role role;
     private LocalDateTime updatedAt;
 

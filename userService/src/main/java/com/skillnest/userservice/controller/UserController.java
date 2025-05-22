@@ -1,10 +1,10 @@
 package com.skillnest.userservice.controller;
 
 import com.skillnest.userservice.dtos.request.*;
+import com.skillnest.userservice.dtos.request.CreateUserRequest;
 import com.skillnest.userservice.dtos.response.*;
 import com.skillnest.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,16 +18,16 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("create-user")
-    public ResponseEntity<CreatedUserResponse> createUser(@RequestBody CreateUserRequest createUserRequest) {
+    public ResponseEntity<CreatedUserResponse> createUser(@RequestBody RegisterUserRequest createUserRequest) {
         return ResponseEntity.ok(userService.register(createUserRequest));
     }
     @PostMapping("login-user")
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok(userService.login(loginRequest));
     }
-    @PostMapping("send-email-verification/{email}")
-    public ResponseEntity<OTPResponse> sendEmailValidationOTP(@PathVariable ("email") String email){
-        return ResponseEntity.ok(userService.sendEmailValidationOTP(email));
+    @PostMapping("send-email-verification")
+    public ResponseEntity<OTPResponse> sendEmailValidationOTP(CreateUserRequest createUserRequest){
+        return ResponseEntity.ok(userService.sendVerificationOTP(createUserRequest));
     }
     @PostMapping("update-profile")
     public ResponseEntity<UpdateUserProfileResponse> updateUserProfile(@RequestBody UpdateUserProfileRequest updateUserProfileRequest){

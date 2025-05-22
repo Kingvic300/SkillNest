@@ -1,18 +1,21 @@
 package com.skillnest.userservice.service;
 
 import com.cloudinary.Cloudinary;
+import com.skillnest.userservice.data.model.Email;
 import com.skillnest.userservice.data.model.OTP;
 import com.skillnest.userservice.data.model.User;
+import com.skillnest.userservice.data.repositories.EmailRepository;
 import com.skillnest.userservice.data.repositories.OTPRepository;
 import com.skillnest.userservice.data.repositories.UserRepository;
 import com.skillnest.userservice.dtos.request.*;
+import com.skillnest.userservice.dtos.request.CreateUserRequest;
 import com.skillnest.userservice.dtos.response.*;
 import com.skillnest.userservice.exception.*;
-import com.skillnest.userservice.mapper.OTPMapper;
 import com.skillnest.userservice.mapper.UserMapper;
 import com.skillnest.userservice.util.JwtUtil;
 import com.skillnest.userservice.util.OTPGenerator;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,44 +33,84 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserServiceImpl implements UserService{
 
-
     private final UserRepository userRepository;
-    private final JwtUtil jwtUtil;
+    private final EmailService emailService;
+    private final EmailRepository emailRepository;
+    private final JwtUtil jwtTokenUtil;
     private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
     private final OTPRepository otpRepository;
-    private final EmailService emailService;
     private final Cloudinary cloudinary;
 
 
     @Override
-    public CreatedUserResponse register(CreateUserRequest createUserRequest) {
-        OTP otp = otpRepository.findByEmail(createUserRequest.getEmail())
-                .orElseThrow(() -> new InvalidOtpException("OTP not found for email"));
+    public OTPResponse sendVerificationOTP(CreateUserRequest request) {
+        log.error(request.getEmail());
+        validateRegisterRequest(request);
+        log.error("passed here 1");
+        validateEmail(request.getEmail());
+        log.error("passed here 2");
 
-        if (!otp.getOtp().equals(createUserRequest.getOtp())) {
-            throw new InvalidOtpException("Invalid OTP");
-        }
-        if (otp.getCreatedAt().plusMinutes(10).isBefore(LocalDateTime.now())) {
-            throw new OtpExpiredException("OTP has expired");
-        }
-        if(userRepository.existsByUsername(createUserRequest.getUsername())){
-            throw new AlreadyExistsException("Username already exists");
-        }
+        String otp = OTPGenerator.generateOtp();
+        log.error("passed here 4");
+        LocalDateTime expirationTime = LocalDateTime.now().plusMinutes(2);
+        log.error("passed here 5");
+        String encodedPassword = passwordEncoder.encode(request.getPassword());
+        log.error("passed here 6");
 
-        if(userRepository.existsByEmail(createUserRequest.getEmail())){
-            throw new AlreadyExistsException("Email already exists");
-        }
-        User user = UserMapper.mapToUser(createUserRequest);
-        String encryptedPassword = passwordEncoder.encode(createUserRequest.getPassword());
-        user.setPassword(encryptedPassword);
-        userRepository.save(user);
-        otpRepository.delete(otp);
-        return UserMapper.mapToCreatedUserResponse(user, "User Created Successfully");
+        Email email = new Email();
+        email.setEmail(request.getEmail());
+        email.setPassword(encodedPassword);
+        email.setOtp(otp);
+        email.setExpirationDate(expirationTime);
+        emailRepository.save(email);
+
+        log.error("passed here 9");
+        emailService.sendEmail(request.getEmail(), otp);
+
+        log.error("passed here 10");
+        return UserMapper.mapToOtpSentResponse("OTP sent successfully. Please verify to complete registration.", request.getEmail());
     }
 
+    @Override
+    public CreatedUserResponse register(RegisterUserRequest request) {
+        if (request.getEmail() == null || request.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        if (request.getOtp() == null || request.getOtp().isEmpty()) {
+            throw new IllegalArgumentException("OTP cannot be empty");
+        }
+
+        Email tempUserData = emailRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalStateException("No pending registration found for this email"));
+
+        if (!tempUserData.getOtp().equals(request.getOtp())) {
+            throw new IllegalArgumentException("Invalid OTP code");
+        }
+
+        if (tempUserData.isUsed()) {
+            throw new IllegalStateException("This OTP has already been used");
+        }
+
+        if (tempUserData.getExpirationDate().isBefore(LocalDateTime.now())) {
+            emailRepository.deleteByEmail(request.getEmail());
+            throw new IllegalStateException("OTP expired. Please request a new one");
+        }
+
+        User user = UserMapper.mapToUser(request);
+        user.setEmail(tempUserData.getEmail());
+        user.setPassword(tempUserData.getPassword());
+        User saved = userRepository.save(user);
+
+        tempUserData.setUsed(true);
+        emailRepository.save(tempUserData);
+        emailRepository.deleteByEmail(request.getEmail());
+
+        return UserMapper.mapToCreatedUserResponse( saved,"Registration Successful");
+    }
     @Override
     public UploadResponse uploadFile(MultipartFile file) throws IOException {
         var cloud = cloudinary
@@ -78,17 +121,6 @@ public class UserServiceImpl implements UserService{
         return UserMapper.mapToUploadResponse("Image has been uploaded successfully", cloud);
     }
 
-    @Override
-    public OTPResponse sendEmailValidationOTP(String email) {
-        if (otpRepository.existsByEmail(email)) {
-            otpRepository.deleteByEmail(email);
-        }
-        OTP otp = OTPMapper.mapToOTP(email);
-        otpRepository.save(otp);
-        emailService.sendEmail(email, otp.getOtp());
-        return OTPMapper.mapToOTPResponse("OTP sent successfully", otp.getId());
-
-    }
     @Override
     public LoginResponse login(LoginRequest loginRequest){
         try {
@@ -104,11 +136,11 @@ public class UserServiceImpl implements UserService{
             if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
                 throw new InvalidPasswordException("Invalid password");
             }
-            var jwtToken = jwtUtil.generateToken(user);
+            var jwtToken = jwtTokenUtil.generateToken(user);
 
-            return UserMapper.mapToLoginResponse(jwtToken, "Login was successful");
+            return UserMapper.mapToLoginResponse(jwtToken, "Login was successful", user);
         }catch (BadCredentialsException e){
-           throw new InvalidPasswordException(e.getMessage());
+            throw new InvalidPasswordException(e.getMessage());
         }
     }
 
@@ -132,7 +164,7 @@ public class UserServiceImpl implements UserService{
         }
         UserMapper.mapToUpdateProfile(updateUserProfileRequest, user);
         userRepository.save(user);
-        var token = jwtUtil.generateToken(user);
+        var token = jwtTokenUtil.generateToken(user);
         return UserMapper.mapToUpdateUserProfileResponse(token, "User profile updated successfully");
     }
 
@@ -172,5 +204,47 @@ public class UserServiceImpl implements UserService{
         otpRepository.save(otp);
         emailService.sendResetPasswordEmail(resetPasswordRequest.getEmail(), otp.getOtp());
         return UserMapper.mapToResetPasswordResponse("Email sent Successfully", otp.getOtp());
+    }
+    //    @Override
+//    public LoginResponse handleGoogleLogin(String email, String name) {
+//        if (email == null || email.isEmpty()) {
+//            throw new IllegalArgumentException("Email cannot be empty");
+//        }
+//        if (name == null || name.isEmpty()) {
+//            throw new IllegalArgumentException("Name cannot be empty");
+//        }
+//
+//        Optional<User> userOpt = userRepository.findByEmail(email);
+//        User user;
+//        if (userOpt.isPresent()) {
+//            user = userOpt.get();
+//            if (!user.isGoogleUser()) {
+//                throw new IllegalStateException("Email is registered with a password-based account. Please use password login.");
+//            }
+//        } else {
+//            user = new User();
+//            user.setEmail(email);
+//            user.setName(name);
+//            user.setGoogleUser(true);
+//            user.setContactIds(new ArrayList<>());
+//            user = userRepository.save(user);
+//        }
+//
+//        String token = jwtTokenUtil.generateToken(user.getEmail());
+//        return new LoginResponse("Google login successful", token, user.getId());
+//    }
+    private void validateEmail(String email) {
+        Optional<User> foundUser = userRepository.findByEmail(email);
+        if (foundUser.isPresent()) {
+            throw new AlreadyExistsException("Email already registered");
+        }
+    }
+    private void validateRegisterRequest(CreateUserRequest request) {
+        if (request.getEmail() == null || request.getEmail().isEmpty()) {
+            throw new IllegalArgumentException("Email cannot be empty");
+        }
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password cannot be empty");
+        }
     }
 }

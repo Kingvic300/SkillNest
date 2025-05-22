@@ -93,6 +93,7 @@ public class UserServiceImplTest {
 
         UpdateUserProfileResponse updateUserProfileResponse = userService.updateProfile(updateUserProfileRequest);
 
+        assertNotNull(loginResponse);
         assertEquals("User profile updated successfully", updateUserProfileResponse.getMessage());
         assertNotNull(updateUserProfileResponse.getToken());
     }
@@ -143,9 +144,7 @@ public class UserServiceImplTest {
         duplicateUsernameRequest.setOtp(createUserRequest.getOtp());
         duplicateUsernameRequest.setActive(true);
 
-        assertThrows(InvalidOtpException.class, () -> {
-            userService.register(duplicateUsernameRequest);
-        });
+        assertThrows(InvalidOtpException.class, () -> userService.register(duplicateUsernameRequest));
     }
 
     @Test
@@ -154,9 +153,7 @@ public class UserServiceImplTest {
         loginRequest.setUsername("victoroladimeji");
         loginRequest.setPassword("wrongpassword");
 
-        assertThrows(RuntimeException.class, () -> {
-            userService.login(loginRequest);
-        });
+        assertThrows(RuntimeException.class, () -> userService.login(loginRequest));
     }
 
     @Test
@@ -170,9 +167,7 @@ public class UserServiceImplTest {
 
         SecurityContextHolder.clearContext();
 
-        assertThrows(RuntimeException.class, () -> {
-            userService.updateProfile(updateUserProfileRequest);
-        });
+        assertThrows(RuntimeException.class, () -> userService.updateProfile(updateUserProfileRequest));
     }
 
     @Test
@@ -182,9 +177,7 @@ public class UserServiceImplTest {
         changePasswordRequest.setOtp("invalidotp");
         changePasswordRequest.setNewPassword("password");
 
-        assertThrows(InvalidOtpException.class, () -> {
-            userService.resetPassword(changePasswordRequest);
-        });
+        assertThrows(InvalidOtpException.class, () -> userService.resetPassword(changePasswordRequest));
     }
 
     @Test
@@ -192,9 +185,7 @@ public class UserServiceImplTest {
         ResetPasswordRequest resetPasswordRequest = new ResetPasswordRequest();
         resetPasswordRequest.setEmail("nonexistingemail@example.com");
 
-        assertThrows(UserNotFoundException.class, () -> {
-            userService.sendResetOtp(resetPasswordRequest);
-        });
+        assertThrows(UserNotFoundException.class, () -> userService.sendResetOtp(resetPasswordRequest));
     }
 
     @Test
@@ -208,9 +199,7 @@ public class UserServiceImplTest {
         invalidEmailRequest.setOtp("123456");
         invalidEmailRequest.setActive(true);
 
-        assertThrows(RuntimeException.class, () -> {
-            userService.register(invalidEmailRequest);
-        });
+        assertThrows(RuntimeException.class, () -> userService.register(invalidEmailRequest));
     }
 
     @Test
@@ -222,9 +211,7 @@ public class UserServiceImplTest {
         missingFieldsRequest.setOtp("123456");
         missingFieldsRequest.setActive(true);
 
-        assertThrows(RuntimeException.class, () -> {
-            userService.register(missingFieldsRequest);
-        });
+        assertThrows(RuntimeException.class, () -> userService.register(missingFieldsRequest));
     }
 
     @AfterEach

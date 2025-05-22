@@ -1,5 +1,6 @@
 package com.skillnest.userservice.service;
 
+import com.cloudinary.Cloudinary;
 import com.skillnest.userservice.data.model.OTP;
 import com.skillnest.userservice.data.model.User;
 import com.skillnest.userservice.data.repositories.OTPRepository;
@@ -19,8 +20,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -35,6 +39,7 @@ public class UserServiceImpl implements UserService{
     private final AuthenticationManager authenticationManager;
     private final OTPRepository otpRepository;
     private final EmailService emailService;
+    private final Cloudinary cloudinary;
 
 
     @Override
@@ -64,14 +69,24 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public void sendEmailValidationOTP(String email) {
+    public UploadResponse uploadFile(MultipartFile file) throws IOException {
+        var cloud = cloudinary
+                .uploader()
+                .upload(file.getBytes(), Map.of("public_id",UUID.randomUUID().toString()))
+                .get("url")
+                .toString();
+        return UserMapper.mapToUploadResponse("Image has been uploaded successfully", cloud);
+    }
+
+    @Override
+    public OTPResponse sendEmailValidationOTP(String email) {
         if (otpRepository.existsByEmail(email)) {
             otpRepository.deleteByEmail(email);
         }
         OTP otp = OTPMapper.mapToOTP(email);
         otpRepository.save(otp);
         emailService.sendEmail(email, otp.getOtp());
-        OTPMapper.mapToOTPResponse("OTP sent successfully", otp.getId());
+        return OTPMapper.mapToOTPResponse("OTP sent successfully", otp.getId());
 
     }
     @Override
@@ -144,7 +159,7 @@ public class UserServiceImpl implements UserService{
         return UserMapper.mapToResetPasswordResponse("Password reset successful", otp.getOtp());
     }
     @Override
-    public void sendResetOtp(ResetPasswordRequest resetPasswordRequest){
+    public ResetPasswordResponse sendResetOtp(ResetPasswordRequest resetPasswordRequest){
         Optional<User> user = userRepository.findByEmail(resetPasswordRequest.getEmail());
         if (user.isEmpty()) {
             throw new UserNotFoundException("User not found");
@@ -156,6 +171,6 @@ public class UserServiceImpl implements UserService{
         otp.setExpiresAt(LocalDateTime.now().plusMinutes(30));
         otpRepository.save(otp);
         emailService.sendResetPasswordEmail(resetPasswordRequest.getEmail(), otp.getOtp());
-        UserMapper.mapToResetPasswordResponse("Email sent Successfully", otp.getOtp());
+        return UserMapper.mapToResetPasswordResponse("Email sent Successfully", otp.getOtp());
     }
 }

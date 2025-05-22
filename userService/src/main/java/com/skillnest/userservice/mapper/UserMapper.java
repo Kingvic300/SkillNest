@@ -4,10 +4,7 @@ import com.skillnest.userservice.data.enums.Role;
 import com.skillnest.userservice.data.model.User;
 import com.skillnest.userservice.dtos.request.CreateUserRequest;
 import com.skillnest.userservice.dtos.request.UpdateUserProfileRequest;
-import com.skillnest.userservice.dtos.response.CreatedUserResponse;
-import com.skillnest.userservice.dtos.response.LoginResponse;
-import com.skillnest.userservice.dtos.response.ResetPasswordResponse;
-import com.skillnest.userservice.dtos.response.UpdateUserProfileResponse;
+import com.skillnest.userservice.dtos.response.*;
 import com.skillnest.userservice.util.EmailVerification;
 
 import java.time.LocalDateTime;
@@ -59,5 +56,11 @@ public class UserMapper {
         resetPasswordResponse.setMessage(message);
         resetPasswordResponse.setOtp(otp);
         return resetPasswordResponse;
+    }
+    public static UploadResponse mapToUploadResponse(String message, String cloudinaryUrl){
+        UploadResponse uploadResponse = new UploadResponse();
+        uploadResponse.setMessage(message);
+        uploadResponse.setCloudinaryUrl(cloudinaryUrl);
+        return uploadResponse;
     }
 }

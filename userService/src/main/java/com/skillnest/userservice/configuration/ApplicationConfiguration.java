@@ -1,7 +1,5 @@
 package com.skillnest.userservice.configuration;
 
-import com.skillnest.userservice.data.repositories.EmployerRepository;
-import com.skillnest.userservice.data.repositories.JobSeekerRepository;
 import com.skillnest.userservice.data.repositories.UserRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -27,37 +25,12 @@ import java.util.Optional;
 public class ApplicationConfiguration {
 
     @Autowired
-    private EmployerRepository employerRepository;
-    @Autowired
-    private  JobSeekerRepository jobSeekerRepository;
-
-    @Autowired
     private UserRepository userRepository;
-
-
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return username -> {
-            UserDetails user = null;
-
-            Optional<UserDetails> employer = employerRepository.findEmployerByUsername(username);
-            if (employer.isPresent()) {
-                return employer.get();
-            }
-
-            Optional<UserDetails> jobSeeker = jobSeekerRepository.findJobSeekerByUsername(username);
-            if (jobSeeker.isPresent()) {
-                return jobSeeker.get();
-            }
-
-            Optional<UserDetails> userOpt = userRepository.findUserByUsername(username);
-            if (userOpt.isPresent()) {
-                return userOpt.get();
-            }
-
-            throw new UsernameNotFoundException("User not found with username: " + username);
-        };
+        return username -> userRepository.findUserByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
     }
 
 

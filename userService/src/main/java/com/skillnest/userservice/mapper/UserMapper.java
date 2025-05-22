@@ -3,6 +3,7 @@ package com.skillnest.userservice.mapper;
 import com.skillnest.userservice.data.enums.Role;
 import com.skillnest.userservice.data.model.User;
 import com.skillnest.userservice.dtos.request.CreateUserRequest;
+import com.skillnest.userservice.dtos.request.RegisterUserRequest;
 import com.skillnest.userservice.dtos.request.UpdateUserProfileRequest;
 import com.skillnest.userservice.dtos.response.*;
 import com.skillnest.userservice.util.EmailVerification;
@@ -11,22 +12,22 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class UserMapper {
-    public static User mapToUser(CreateUserRequest createUserRequest) {
+    public static User mapToUser(RegisterUserRequest createUserRequest) {
         User user = new User();
         user.setId(UUID.randomUUID().toString());
         user.setUsername(createUserRequest.getUsername());
-        user.setPassword(createUserRequest.getPassword());
         user.setEmail(EmailVerification.emailVerification(createUserRequest.getEmail()));
-        user.setPhoneNumber(createUserRequest.getPhoneNumber());
         user.setRole(Role.USER);
-        user.setLocation(createUserRequest.getLocation());
         user.setRegistrationDate(LocalDateTime.now());
         user.setActive(true);
+        user.setFullName(createUserRequest.getFullName());
+        user.setPhoneNumber(createUserRequest.getPhoneNumber());
+        user.setLocation(createUserRequest.getLocation());
+        user.setVerified(true);
         return user;
     }
     public static void mapToUpdateProfile(UpdateUserProfileRequest updateUserProfileRequest, User user) {
         user.setUsername(updateUserProfileRequest.getUsername());
-        user.setEmail(updateUserProfileRequest.getEmail());
         user.setPhoneNumber(updateUserProfileRequest.getPhoneNumber());
         user.setRole(Role.USER);
         user.setLocation(updateUserProfileRequest.getLocation());
@@ -45,10 +46,11 @@ public class UserMapper {
         createdUserResponse.setMessage(message);
         return createdUserResponse;
     }
-    public static LoginResponse mapToLoginResponse(String jwtToken, String message) {
+    public static LoginResponse mapToLoginResponse(String jwtToken, String message, User user) {
         LoginResponse loginResponse = new LoginResponse();
         loginResponse.setToken(jwtToken);
         loginResponse.setMessage(message);
+        loginResponse.setUser(user);
         return loginResponse;
     }
     public static ResetPasswordResponse mapToResetPasswordResponse(String message, String otp){
@@ -62,5 +64,12 @@ public class UserMapper {
         uploadResponse.setMessage(message);
         uploadResponse.setCloudinaryUrl(cloudinaryUrl);
         return uploadResponse;
+    }
+
+    public static OTPResponse mapToOtpSentResponse(String message, String email) {
+        OTPResponse otpResponse = new OTPResponse();
+        otpResponse.setMessage(message);
+        otpResponse.setEmail(email);
+        return otpResponse;
     }
 }

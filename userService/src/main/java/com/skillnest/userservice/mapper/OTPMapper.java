@@ -19,10 +19,10 @@ public class OTPMapper {
         otp.setExpiresAt(LocalDateTime.now().plusMinutes(2));
         return otp;
     }
-    public static OTPResponse mapToOTPResponse(String message, String id) {
+    public static OTPResponse mapToOTPResponse(String message, String email) {
         OTPResponse otpResponse = new OTPResponse();
         otpResponse.setMessage(message);
-        otpResponse.setId(id);
+        otpResponse.setEmail(email);
         return otpResponse;
     }
 }

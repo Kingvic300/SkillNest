@@ -16,4 +16,5 @@ public class OTP {
     private String email;
     private LocalDateTime createdAt;
     private LocalDateTime expiresAt;
+    private boolean used = false;
 }

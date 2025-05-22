@@ -6,7 +6,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class OTPResponse {
-    private String id;
     private String message;
+    private String email;
 
 }

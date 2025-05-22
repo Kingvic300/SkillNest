@@ -6,7 +6,6 @@ import lombok.Setter;
 @Setter
 @Getter
 public class UpdateUserProfileRequest {
-    private String email;
     private String username;
     private String location;
     private String phoneNumber;

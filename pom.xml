@@ -13,47 +13,92 @@
 
     <modules>
         <module>userService</module>
-<!--        <module>jobseeker-service</module>-->
-<!--        <module>employer-service</module>-->
-<!--        <module>job-service</module>-->
-<!--        <module>review-service</module>-->
-<!--        <module>admin-service</module>-->
-<!--        <module>gateway-service</module>-->
-<!--        <module>config-service</module>-->
+        <!-- Uncomment other modules as needed -->
+        <!-- <module>jobseeker-service</module> -->
+        <!-- <module>employer-service</module> -->
+        <!-- <module>job-service</module> -->
+        <!-- <module>review-service</module> -->
+        <!-- <module>admin-service</module> -->
+        <!-- <module>gateway-service</module> -->
+        <!-- <module>config-service</module> -->
     </modules>
 
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.4.5</version> <!-- Match latest supported Spring Boot version -->
+        <version>3.4.5</version>
         <relativePath/>
     </parent>
 
     <properties>
-        <java.version>22</java.version> <!-- Use Java 17 for max compatibility -->
+        <java.version>22</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+
+        <lombok.version>1.18.32</lombok.version>
+        <cloudinary.version>1.39.0</cloudinary.version>
+        <jjwt.version>0.11.5</jjwt.version>
+        <embed-mongo.version>4.20.0</embed-mongo.version>
+        <greenmail.version>1.5.9</greenmail.version>
     </properties>
 
     <dependencyManagement>
         <dependencies>
-            <dependency>
-                <groupId>org.projectlombok</groupId>
-                <artifactId>lombok</artifactId>
-               <optional>true</optional>
-            </dependency>
-
-            <!-- https://mvnrepository.com/artifact/org.springframework/spring-test -->
-            <dependency>
-                <groupId>org.springframework</groupId>
-                <artifactId>spring-test</artifactId>
-                <version>7.0.0-M5</version>
-                <scope>test</scope>
-            </dependency>
+            <!-- Spring Boot BOM - manages most Spring dependencies -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.4.5</version>
+                <version>${project.parent.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+
+            <!-- Lombok -->
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <optional>true</optional>
+            </dependency>
+
+            <!-- Cloudinary -->
+            <dependency>
+                <groupId>com.cloudinary</groupId>
+                <artifactId>cloudinary-http44</artifactId>
+                <version>${cloudinary.version}</version>
+            </dependency>
+
+            <!-- JJWT -->
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-api</artifactId>
+                <version>${jjwt.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-impl</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.jsonwebtoken</groupId>
+                <artifactId>jjwt-jackson</artifactId>
+                <version>${jjwt.version}</version>
+                <scope>runtime</scope>
+            </dependency>
+
+            <!-- Test dependencies -->
+            <dependency>
+                <groupId>de.flapdoodle.embed</groupId>
+                <artifactId>de.flapdoodle.embed.mongo</artifactId>
+                <version>${embed-mongo.version}</version>
+                <scope>test</scope>
+            </dependency>
+            <dependency>
+                <groupId>com.icegreen</groupId>
+                <artifactId>greenmail</artifactId>
+                <version>${greenmail.version}</version>
+                <scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -64,7 +109,23 @@
                 <plugin>
                     <groupId>org.springframework.boot</groupId>
                     <artifactId>spring-boot-maven-plugin</artifactId>
-                    <version>3.4.5</version>
+                    <version>${project.parent.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>3.13.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <annotationProcessorPaths>
+                            <path>
+                                <groupId>org.projectlombok</groupId>
+                                <artifactId>lombok</artifactId>
+                                <version>${lombok.version}</version>
+                            </path>
+                        </annotationProcessorPaths>
+                    </configuration>
                 </plugin>
             </plugins>
         </pluginManagement>

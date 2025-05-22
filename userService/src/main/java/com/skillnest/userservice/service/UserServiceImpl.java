@@ -69,12 +69,13 @@ public class UserServiceImpl implements UserService{
     }
 
     @Override
-    public String uploadFile(MultipartFile file) throws IOException {
-        return cloudinary
+    public UploadResponse uploadFile(MultipartFile file) throws IOException {
+        var cloud = cloudinary
                 .uploader()
                 .upload(file.getBytes(), Map.of("public_id",UUID.randomUUID().toString()))
                 .get("url")
                 .toString();
+        return UserMapper.mapToUploadResponse("Image has been uploaded successfully", cloud);
     }
 
     @Override

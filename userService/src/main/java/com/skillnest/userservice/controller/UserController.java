@@ -4,6 +4,7 @@ import com.skillnest.userservice.dtos.request.*;
 import com.skillnest.userservice.dtos.response.*;
 import com.skillnest.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,8 +25,8 @@ public class UserController {
     public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest){
         return ResponseEntity.ok(userService.login(loginRequest));
     }
-    @PostMapping("send-email-verification")
-    public ResponseEntity<OTPResponse> sendEmailValidationOTP(@RequestParam String email){
+    @PostMapping("send-email-verification/{email}")
+    public ResponseEntity<OTPResponse> sendEmailValidationOTP(@PathVariable ("email") String email){
         return ResponseEntity.ok(userService.sendEmailValidationOTP(email));
     }
     @PostMapping("update-profile")
@@ -41,7 +42,7 @@ public class UserController {
         return ResponseEntity.ok(userService.sendResetOtp(resetPasswordRequest));
     }
     @PostMapping("upload-picture")
-    public ResponseEntity<String> uploadPicture(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<UploadResponse> uploadPicture(@RequestParam("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(userService.uploadFile(file));
     }
 }

@@ -8,9 +8,7 @@ import java.io.IOException;
 
 public interface UserService {
     CreatedUserResponse register(CreateUserRequest createUserRequest);
-
-    String uploadFile(MultipartFile file) throws IOException;
-
+    UploadResponse uploadFile(MultipartFile file) throws IOException;
     OTPResponse sendEmailValidationOTP(String email);
     LoginResponse login(LoginRequest loginResponse);
     UpdateUserProfileResponse updateProfile(UpdateUserProfileRequest updateUserProfileRequest);

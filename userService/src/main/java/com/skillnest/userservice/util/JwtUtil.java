@@ -1,5 +1,6 @@
 package com.skillnest.userservice.util;
 
+import io.github.cdimascio.dotenv.Dotenv;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -17,11 +18,10 @@ import java.util.function.Function;
 
 @Service
 public class JwtUtil {
-    @Value("Lro7KxAF6IvxTbQqynMFdzqHCL1m55CvaZ/V2M2ulawETobWLXXHZp3P5nMC+wMf")
-    private String SECRET_KEY;
 
-    @Value("${reset.jwt.expiration}")
-    private Long expirationTime;
+    private final Dotenv dotenv = Dotenv.configure().ignoreIfMissing().load();
+
+    private final String SECRET_KEY = dotenv.get("RESET_JWT_SECRET");
 
     public String extractUserName(String jwtToken) {
         return extractClaims(jwtToken, Claims::getSubject);

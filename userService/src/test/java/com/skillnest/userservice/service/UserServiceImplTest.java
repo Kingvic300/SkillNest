@@ -91,7 +91,6 @@ public class UserServiceImplTest {
 
         @Test
         public void testRegister_Success() {
-            log.info("test");
             userService.sendVerificationOTP(createUserRequest);
 
             Email emailData = emailRepository.findByEmail(createUserRequest.getEmail())
@@ -139,10 +138,7 @@ public class UserServiceImplTest {
 
         @Test
         public void testRegister_AlreadyUsedOtp_ThrowsException() {
-            log.error("got here");
             userService.sendVerificationOTP(createUserRequest);
-            log.error("passed here");
-
             Email email = emailRepository.findByEmail(createUserRequest.getEmail())
                     .orElseThrow(() -> new RuntimeException("Email not found"));
             email.setUsed(true);

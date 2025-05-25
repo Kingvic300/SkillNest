@@ -11,18 +11,10 @@
     <name>SkillNest Microservices</name>
     <description>Parent project for SkillNest microservices</description>
 
-    <modules>
-        <module>userService</module>
-        <!-- Uncomment other modules as needed -->
-        <!-- <module>jobseeker-service</module> -->
-        <!-- <module>employer-service</module> -->
-        <!-- <module>job-service</module> -->
-        <!-- <module>review-service</module> -->
-        <!-- <module>admin-service</module> -->
-        <!-- <module>gateway-service</module> -->
-        <!-- <module>config-service</module> -->
-    </modules>
-
+<modules>
+    <module>user-service</module>
+    <module>JobSeeker-service</module>
+</modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -52,7 +44,12 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-
+            <!-- https://mvnrepository.com/artifact/com.sendgrid/sendgrid-java -->
+            <dependency>
+                <groupId>com.sendgrid</groupId>
+                <artifactId>sendgrid-java</artifactId>
+                <version>4.10.3</version>
+            </dependency>
             <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>

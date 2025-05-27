@@ -19,12 +19,13 @@ public class UserMapper {
         return user;
     }
     public static void mapToUpdateProfile(UpdateUserProfileRequest updateUserProfileRequest, User user) {
+        user.setEmail(updateUserProfileRequest.getEmail());
         user.setUsername(updateUserProfileRequest.getUsername());
         user.setPhoneNumber(updateUserProfileRequest.getPhoneNumber());
         user.setRole(updateUserProfileRequest.getRoles());
         user.setLocation(updateUserProfileRequest.getLocation());
         user.setProfilePicturePath(updateUserProfileRequest.getProfilePicturePath());
-        user.setActive(updateUserProfileRequest.isActive());
+        user.setActive(user.isActive());
     }
     public static UpdateUserProfileResponse mapToUpdateUserProfileResponse(String token, String message) {
         UpdateUserProfileResponse updateUserProfileResponse = new UpdateUserProfileResponse();
@@ -32,10 +33,11 @@ public class UserMapper {
         updateUserProfileResponse.setToken(token);
         return updateUserProfileResponse;
     }
-    public static CreatedUserResponse mapToCreatedUserResponse(User user, String message) {
+    public static CreatedUserResponse mapToCreatedUserResponse(String jwtToken,User user, String message) {
         CreatedUserResponse createdUserResponse = new CreatedUserResponse();
         createdUserResponse.setUser(user);
         createdUserResponse.setMessage(message);
+        createdUserResponse.setJwtToken(jwtToken);
         return createdUserResponse;
     }
     public static LoginResponse mapToLoginResponse(String jwtToken, String message, User user) {

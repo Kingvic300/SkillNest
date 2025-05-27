@@ -16,6 +16,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
+
 @Setter
 @Getter
 @Document(collection = "user")
@@ -30,14 +31,20 @@ public class User implements UserDetails{
     private String profilePicturePath;
     private LocalDateTime registrationDate;
     private String location;
-    private boolean isActive;
+    private boolean active = true;
     private Role role;
     private LocalDateTime updatedAt;
-
+    
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of( new SimpleGrantedAuthority(role.toString()) );
+    }
+
+
+    @Override
+    public String getUsername() {
+        return this.email;
     }
 
     @Override
@@ -59,4 +66,5 @@ public class User implements UserDetails{
     public boolean isEnabled() {
         return true;
     }
+
 }

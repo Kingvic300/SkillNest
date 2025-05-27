@@ -1,5 +1,6 @@
 package com.skillnest.userservice.dtos.request;
 
+import com.skillnest.userservice.data.enums.Role;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -10,5 +11,5 @@ import lombok.ToString;
 public class LoginRequest {
     private String email;
     private String password;
-    private String role;
+    private Role role;
 }

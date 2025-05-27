@@ -1,5 +1,6 @@
 package com.skillnest.userservice.dtos.request;
 
+import com.skillnest.userservice.data.enums.Role;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -8,4 +9,5 @@ import lombok.Setter;
 public class RegisterUserRequest {
     private String email;
     private String otp;
+    private Role role;
 }

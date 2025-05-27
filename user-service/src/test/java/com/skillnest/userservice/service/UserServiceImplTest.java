@@ -87,7 +87,7 @@ class UserServiceImplTest {
         loginRequest = new LoginRequest();
         loginRequest.setEmail("test@example.com");
         loginRequest.setPassword("password123");
-        loginRequest.setRole(Role.ADMIN.name());
+        loginRequest.setRole(Role.ADMIN);
 
         changePasswordRequest = new ChangePasswordRequest();
         changePasswordRequest.setEmail("test@example.com");

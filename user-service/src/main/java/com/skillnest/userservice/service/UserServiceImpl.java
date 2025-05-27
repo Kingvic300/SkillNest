@@ -65,7 +65,9 @@ public class UserServiceImpl implements UserService{
         pendingUser.setEmail(request.getEmail());
         pendingUser.setPassword(encodedPassword);
         pendingUser.setOtp(otp);
+        pendingUser.setRole(request.getRole());
         pendingUser.setExpiryTime(expirationTime);
+
         pendingUserRepository.save(pendingUser);
 
         emailService.sendEmail(request.getEmail(), otp);
@@ -89,11 +91,15 @@ public class UserServiceImpl implements UserService{
         User user = new User();
         user.setEmail(pendingUser.getEmail());
         user.setPassword(pendingUser.getPassword());
+        user.setRole(pendingUser.getRole());
+        user.setActive(true);
         userRepository.save(user);
+        var jwtToken = jwtTokenUtil.generateToken(user);
+
 
         pendingUserRepository.delete(pendingUser);
 
-        return UserMapper.mapToCreatedUserResponse( user,"Registration Successful");
+        return UserMapper.mapToCreatedUserResponse(jwtToken,user,"Registration Successful");
     }
     @Override
     public UploadResponse uploadFile(MultipartFile file) throws IOException {
@@ -110,19 +116,16 @@ public class UserServiceImpl implements UserService{
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getEmail(), loginRequest.getPassword()));
-        log.info("passed here 1");
         Optional<User> existingUser = userRepository.findByEmail(loginRequest.getEmail());
         if (existingUser.isEmpty()) {
             throw new UserNotFoundException("User not found with email");
         }
-        log.info("passed here 2");
         User user = existingUser.get();
+        user.setActive(true);
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new InvalidPasswordException("Invalid password");
         }
-        log.info("passed here 3");
         var jwtToken = jwtTokenUtil.generateToken(user);
-        log.info("passed here 4");
         return UserMapper.mapToLoginResponse(jwtToken, "Login was successful", user);
     }
 
@@ -134,17 +137,20 @@ public class UserServiceImpl implements UserService{
             throw new RuntimeException("No authenticated user found");
         }
 
-        String username = authentication.getName();
-        Optional<User> existingUser = userRepository.findByUsername(username);
+        String email = authentication.getName();
+        log.error(email);
+        Optional<User> existingUser = userRepository.findByEmail(email);
         if (existingUser.isEmpty()) {
             throw new UserNotFoundException("User not found with username");
         }
+        log.error(existingUser.get().getEmail());
         User user = existingUser.get();
-
-        if (!user.isActive()) {
-            throw new IsNotActiveException("Account has been deactivated");
-        }
+        log.error(String.valueOf(user.isActive()));
+//        if (!user.isActive()) {
+//            throw new IsNotActiveException("Account has been deactivated");
+//        }
         UserMapper.mapToUpdateProfile(updateUserProfileRequest, user);
+
         userRepository.save(user);
         var token = jwtTokenUtil.generateToken(user);
         return UserMapper.mapToUpdateUserProfileResponse(token, "User profile updated successfully");

@@ -16,9 +16,7 @@ import com.skillnest.userservice.util.JwtUtil;
 import com.skillnest.userservice.util.OTPGenerator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -89,6 +87,7 @@ public class UserServiceImpl implements UserService{
         }
 
         User user = new User();
+        user.setId(UUID.randomUUID().toString());
         user.setEmail(pendingUser.getEmail());
         user.setPassword(pendingUser.getPassword());
         user.setRole(pendingUser.getRole());
@@ -138,17 +137,14 @@ public class UserServiceImpl implements UserService{
         }
 
         String email = authentication.getName();
-        log.error(email);
         Optional<User> existingUser = userRepository.findByEmail(email);
         if (existingUser.isEmpty()) {
             throw new UserNotFoundException("User not found with username");
         }
-        log.error(existingUser.get().getEmail());
         User user = existingUser.get();
-        log.error(String.valueOf(user.isActive()));
-//        if (!user.isActive()) {
-//            throw new IsNotActiveException("Account has been deactivated");
-//        }
+        if (!user.isActive()) {
+            throw new IsNotActiveException("Account has been deactivated");
+        }
         UserMapper.mapToUpdateProfile(updateUserProfileRequest, user);
 
         userRepository.save(user);
@@ -192,6 +188,14 @@ public class UserServiceImpl implements UserService{
         otpRepository.save(otp);
         emailService.sendResetPasswordEmail(resetPasswordRequest.getEmail(), otp.getOtp());
         return UserMapper.mapToResetPasswordResponse("PendingUser sent Successfully", otp.getOtp());
+    }
+    @Override
+    public FoundResponse findUserById(String id){
+        Optional<User> user = userRepository.findById(id);
+            if(user.isEmpty()){
+                throw new UserNotFoundException("User not found with id");
+            }
+        return UserMapper.mapToFoundResponse("User found", user.get().getId());
     }
     //    @Override
 //    public LoginResponse handleGoogleLogin(String email, String name) {

@@ -14,6 +14,8 @@
 <modules>
     <module>user-service</module>
     <module>JobSeeker-service</module>
+    <module>employer-service</module>
+    <module>job-service</module>
 </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

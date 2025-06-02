@@ -15,5 +15,7 @@ public interface UserService {
     UpdateUserProfileResponse updateProfile(UpdateUserProfileRequest updateUserProfileRequest);
     ResetPasswordResponse resetPassword(ChangePasswordRequest changePasswordRequest);
     ResetPasswordResponse sendResetOtp(ResetPasswordRequest resetPasswordRequest);
+
+    FoundResponse findUserById(String id);
 }
 

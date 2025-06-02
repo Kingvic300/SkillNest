@@ -120,10 +120,10 @@ public class UserServiceImpl implements UserService{
             throw new UserNotFoundException("User not found with email");
         }
         User user = existingUser.get();
-        user.setActive(true);
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new InvalidPasswordException("Invalid password");
         }
+        user.setActive(true);
         var jwtToken = jwtTokenUtil.generateToken(user);
         return UserMapper.mapToLoginResponse(jwtToken, "Login was successful", user);
     }
@@ -137,6 +137,7 @@ public class UserServiceImpl implements UserService{
         }
 
         String email = authentication.getName();
+        log.error(email);
         Optional<User> existingUser = userRepository.findByEmail(email);
         if (existingUser.isEmpty()) {
             throw new UserNotFoundException("User not found with username");

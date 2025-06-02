@@ -6,8 +6,10 @@ import com.skillnest.userservice.dtos.UserDto;
 import com.skillnest.userservice.dtos.request.*;
 import com.skillnest.userservice.dtos.request.CreateUserRequest;
 import com.skillnest.userservice.dtos.response.*;
+import com.skillnest.userservice.exception.*;
 import com.skillnest.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,32 +25,98 @@ public class UserController {
     private final UserRepository userRepository;
 
     @PostMapping("create-user")
-    public ResponseEntity<CreatedUserResponse> createUser(@RequestBody RegisterUserRequest createUserRequest) {
-        return ResponseEntity.ok(userService.register(createUserRequest));
+    public ResponseEntity<?> createUser(@RequestBody RegisterUserRequest createUserRequest) {
+        try{
+            return ResponseEntity.ok(userService.register(createUserRequest));
+        }catch(UserNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (OtpExpiredException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (InvalidOtpException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+
     }
     @PostMapping("login-user")
-    public ResponseEntity<LoginResponse> loginUser(@RequestBody LoginRequest loginRequest){
-        return ResponseEntity.ok(userService.login(loginRequest));
+    public ResponseEntity<?> loginUser(@RequestBody LoginRequest loginRequest){
+        try{
+            return ResponseEntity.ok(userService.login(loginRequest));
+        }catch (InvalidPasswordException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (UserNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
     @PostMapping("send-email-verification")
-    public ResponseEntity<OTPResponse> sendEmailValidationOTP(@RequestBody CreateUserRequest createUserRequest){
-        return ResponseEntity.ok(userService.sendVerificationOTP(createUserRequest ));
+    public ResponseEntity<?> sendEmailValidationOTP(@RequestBody CreateUserRequest createUserRequest){
+        try{
+            return ResponseEntity.ok(userService.sendVerificationOTP(createUserRequest ));
+        }catch (AlreadyExistsException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+
     }
     @PostMapping("update-profile")
-    public ResponseEntity<UpdateUserProfileResponse> updateUserProfile(@RequestBody UpdateUserProfileRequest updateUserProfileRequest){
-        return ResponseEntity.ok(userService.updateProfile(updateUserProfileRequest));
+    public ResponseEntity<?> updateUserProfile(@RequestBody UpdateUserProfileRequest updateUserProfileRequest){
+        try{
+            return ResponseEntity.ok(userService.updateProfile(updateUserProfileRequest));
+
+        }catch (IsNotActiveException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (UserNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
     }
     @PostMapping("reset-password")
-    public ResponseEntity<ResetPasswordResponse> resetPassword(@RequestBody ChangePasswordRequest changePasswordRequest){
-        return ResponseEntity.ok(userService.resetPassword(changePasswordRequest));
+    public ResponseEntity<?> resetPassword(@RequestBody ChangePasswordRequest changePasswordRequest){
+        try{
+            return ResponseEntity.ok(userService.resetPassword(changePasswordRequest));
+        }catch (UserNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());}
+        catch (OtpExpiredException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());}
+        catch (InvalidOtpException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());}
+        catch (RuntimeException e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }catch (Exception e) {
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+
     }
     @PostMapping("send-reset-otp")
-    public ResponseEntity<ResetPasswordResponse> sendResetOTP(@RequestBody ResetPasswordRequest resetPasswordRequest){
-        return ResponseEntity.ok(userService.sendResetOtp(resetPasswordRequest));
+    public ResponseEntity<?> sendResetOTP(@RequestBody ResetPasswordRequest resetPasswordRequest){
+        try{
+            return ResponseEntity.ok(userService.sendResetOtp(resetPasswordRequest));
+        }catch (UserNotFoundException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }catch (Exception e){
+            return ResponseEntity.status(500).body(e.getMessage());
+        }
+
     }
-    @PostMapping("upload-picture")
-    public ResponseEntity<UploadResponse> uploadPicture(@PathVariable("file") MultipartFile file) throws IOException {
-        return ResponseEntity.ok(userService.uploadFile(file));
+    @PostMapping("/upload-picture")
+    public ResponseEntity<UploadResponse> uploadPicture(@RequestParam("file") MultipartFile file) {
+        try {
+            UploadResponse response = userService.uploadFile(file);
+            return ResponseEntity.ok(response);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new UploadResponse("Upload failed: " + e.getMessage(), null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new UploadResponse("Unexpected error: " + e.getMessage(), null));
+        }
     }
     @GetMapping("/{userId}")
     public ResponseEntity<UserDto> findUserById(@PathVariable String userId){

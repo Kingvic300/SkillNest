@@ -47,7 +47,7 @@ public class UserController {
         return ResponseEntity.ok(userService.sendResetOtp(resetPasswordRequest));
     }
     @PostMapping("upload-picture")
-    public ResponseEntity<UploadResponse> uploadPicture(@RequestParam("file") MultipartFile file) throws IOException {
+    public ResponseEntity<UploadResponse> uploadPicture(@PathVariable("file") MultipartFile file) throws IOException {
         return ResponseEntity.ok(userService.uploadFile(file));
     }
     @GetMapping("/{userId}")

@@ -1,9 +1,5 @@
 package com.skillnest.jobSeekerService.dtos.request;
 
-import com.skillnest.jobSeekerService.data.model.AvailabilitySlot;
-import com.skillnest.jobSeekerService.data.model.BankAccount;
-import com.skillnest.jobSeekerService.data.model.VerificationDocument;
-import com.skillnest.jobSeekerService.data.model.WorkImage;
 import lombok.Data;
 
 import java.util.List;
@@ -15,8 +11,8 @@ public class RegisterJobSeekerRequest {
     private String profilePictureUrl;
     private String bio;
     private List<String> skillIds;
-    private List<WorkImage> workImages;
-    private List<AvailabilitySlot> availabilitySlots;
-    private BankAccount bankAccount;
-    private List<VerificationDocument> documents;
+    private List<String> workImageIds;
+    private String availabilitySlotIds;
+    private String bankAccountId;
+    private String documentIds;
 }

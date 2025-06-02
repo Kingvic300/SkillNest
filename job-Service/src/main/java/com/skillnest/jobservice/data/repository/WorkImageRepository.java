@@ -1,6 +1,6 @@
-package com.skillnest.jobSeekerService.data.repository;
+package com.skillnest.jobservice.data.repository;
 
-import com.skillnest.jobSeekerService.data.model.WorkImage;
+import com.skillnest.jobservice.data.model.WorkImage;
 import org.springframework.data.mongodb.repository.MongoRepository;
 
 public interface WorkImageRepository extends MongoRepository<WorkImage, String> {

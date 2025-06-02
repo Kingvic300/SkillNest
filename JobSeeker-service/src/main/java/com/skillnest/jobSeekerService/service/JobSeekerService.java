@@ -8,23 +8,17 @@ import java.util.List;
 public interface JobSeekerService {
     RegisterJobSeekerResponse completeProfile(RegisterJobSeekerRequest registerJobSeekerRequest);
 
-    UpdateJobSeekerProfileResponse updateProfile(String id, UpdateJobSeekerProfileRequest request);
+    UpdateJobSeekerProfileResponse updateProfile(UpdateJobSeekerProfileRequest request);
 
     UpdateJobSeekerProfileResponse getProfile(String id);
 
-    UploadDocumentsResponse uploadDocuments(String jobSeekerId, List<VerificationDocumentRequest> documents);
+    UploadDocumentsResponse uploadDocuments(VerificationDocumentRequest documents);
 
-    WorkImageResponse uploadWorkImages(String jobSeekerId, List<WorkImageRequest> images);
+    AvailabilitySlotResponse setAvailability(List<AvailabilitySlotRequest> slots);
 
-    AvailabilitySlotResponse setAvailability(String jobSeekerId, List<AvailabilitySlotRequest> slots);
-
-    BankAccountResponse setBankAccount(String jobSeekerId, BankAccountRequest request);
-
-    List<VerificationDocumentResponse> getDocuments(String jobSeekerId);
-
-    List<WorkImageResponse> getWorkImages(String  jobSeekerId);
+    VerificationDocumentResponse getDocuments(String jobSeekerId);
 
     List<AvailabilitySlotResponse> getAvailability(String jobSeekerId);
 
-    BankAccountResponse getBankAccount(String jobSeekerId);
+
 }

@@ -66,4 +66,8 @@ class JobSeekerServiceImplTest {
             verify(jobSeekerRepository, times(1)).save(jobSeeker);
         }
     }
+    @Test
+    public void updateProfile_ShouldUpdateJobSeekerProfile_WhenUserExistsAndIsJobSeeker(){
+
+    }
 }

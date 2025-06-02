@@ -9,5 +9,5 @@ import java.util.List;
 @Data
 public class VerificationDocumentResponse {
     private String message;
-    private List<VerificationDocument> document;
+    private VerificationDocument document;
 }

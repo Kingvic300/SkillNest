@@ -12,13 +12,9 @@ import java.time.LocalDateTime;
 public class WorkImage {
     @Id
     private String id;
-
     private String jobSeekerId;
-
     private String imageUrl;
-
     private String caption;
-
     @CreatedDate
     private LocalDateTime uploadDate;
 

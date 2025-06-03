@@ -9,15 +9,17 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class JobRequest {
+public class UpdateJobRequest {
+    private String jobId;
     private String title;
     private String description;
-    private WorkImage workImage;
-    private String employerId;
     private String location;
-    private List<String> requiredSkillIds;
+    private WorkImage workImage;
+    private List<String> requiredSkills;
     private BigDecimal proposedPayment;
     private String jobType;
     private LocalDateTime deadline;
     private String contactInfo;
+    private JobStatus status;
+    private LocalDateTime lastUpdatedDate;
 }

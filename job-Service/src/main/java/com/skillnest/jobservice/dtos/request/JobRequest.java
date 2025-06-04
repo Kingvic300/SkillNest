@@ -10,9 +10,12 @@ import java.util.List;
 @Data
 public class JobRequest {
 <<<<<<< HEAD
+<<<<<<< HEAD
 =======
 
 >>>>>>> master
+=======
+>>>>>>> ac3d6e0bc6e11e6e70e49dfe0dbb46778dfa09ba
     private String title;
     private String description;
     private String employerId;

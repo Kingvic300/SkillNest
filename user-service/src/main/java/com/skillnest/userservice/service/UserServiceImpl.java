@@ -162,6 +162,7 @@ public class UserServiceImpl implements UserService{
         Optional<OTP> optionalOtp = otpRepository.findByEmailAndOtp(changePasswordRequest.getEmail(), changePasswordRequest.getOtp());
 
         if (optionalOtp.isEmpty()) {
+
             throw new InvalidOtpException("Invalid OTP");
         }
         OTP otp = optionalOtp.get();

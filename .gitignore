@@ -31,11 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
-
 ### Eclipse ###
 .env
-<<<<<<< Updated upstream
 user-service/src/main/resources/application.properties/
-=======
-user-service/src/main/resources/application.properties/
->>>>>>> Stashed changes
+
+
+### Eclipse ###

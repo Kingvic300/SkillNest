@@ -107,42 +107,42 @@ public class JobServiceImpl implements JobService {
         jobRepository.save(job.get());
         return new JobResponse("Payment has been set",job.get());
     }
-    @Override
-    public JobResponse verifyCompletion(VerifyCompleteJobRequest jobRequest){
-        Optional<Job> job = jobRepository.findById(jobRequest.getJobId());
-        if(job.isEmpty()){
-            throw new JobNotFoundException("Job not found");
-        }
-        if(jobRequest.isJobSeeker()){
-            if(job.get().getJobSeekerId().isEmpty()){
-                throw new JobSeekerNotFoundException("Job seekerId is empty");
-            }
-            if (!job.get().getJobSeekerId().equals(jobRequest.getUserId())){
-                throw new JobSeekerNotFoundException("Job seekerId is empty");
-            }
-            job.get().setJobSeekerVerifiedCompletion(true);
-            if(job.get().getStatus() == JobStatus.IN_PROGRESS || job.get().getStatus() == JobStatus.TAKEN){
-                job.get().setStatus(JobStatus.COMPLETED_BY_JOB_SEEKER);
-            }
-        }else{
-            if(job.get().getEmployerId().isEmpty()){
-                throw new EmployerNotFoundException("employerId is empty");
-            }
-            if (!job.get().getEmployerId().equals(jobRequest.getUserId())){
-                throw new EmployerNotFoundException("employerId is empty");
-            }
-            job.get().setEmployerVerifiedCompletion(true);
-            if(job.get().getStatus() == JobStatus.IN_PROGRESS || job.get().getStatus() == JobStatus.TAKEN){
-                job.get().setStatus(JobStatus.COMPLETED_BY_EMPLOYER);
-            }
-        }
-        job.get().setLastUpdatedDate(LocalDateTime.now());
-        if (job.get().isJobSeekerVerifiedCompletion() && job.get().isEmployerVerifiedCompletion()) {
-            job.get().setStatus(JobStatus.VERIFIED_COMPLETION);
-        }
-
-
-    }
+//    @Override
+//    public JobResponse verifyCompletion(VerifyCompleteJobRequest jobRequest){
+//        Optional<Job> job = jobRepository.findById(jobRequest.getJobId());
+//        if(job.isEmpty()){
+//            throw new JobNotFoundException("Job not found");
+//        }
+//        if(jobRequest.isJobSeeker()){
+//            if(job.get().getJobSeekerId().isEmpty()){
+//                throw new JobSeekerNotFoundException("Job seekerId is empty");
+//            }
+//            if (!job.get().getJobSeekerId().equals(jobRequest.getUserId())){
+//                throw new JobSeekerNotFoundException("Job seekerId is empty");
+//            }
+//            job.get().setJobSeekerVerifiedCompletion(true);
+//            if(job.get().getStatus() == JobStatus.IN_PROGRESS || job.get().getStatus() == JobStatus.TAKEN){
+//                job.get().setStatus(JobStatus.COMPLETED_BY_JOB_SEEKER);
+//            }
+//        }else{
+//            if(job.get().getEmployerId().isEmpty()){
+//                throw new EmployerNotFoundException("employerId is empty");
+//            }
+//            if (!job.get().getEmployerId().equals(jobRequest.getUserId())){
+//                throw new EmployerNotFoundException("employerId is empty");
+//            }
+//            job.get().setEmployerVerifiedCompletion(true);
+//            if(job.get().getStatus() == JobStatus.IN_PROGRESS || job.get().getStatus() == JobStatus.TAKEN){
+//                job.get().setStatus(JobStatus.COMPLETED_BY_EMPLOYER);
+//            }
+//        }
+//        job.get().setLastUpdatedDate(LocalDateTime.now());
+//        if (job.get().isJobSeekerVerifiedCompletion() && job.get().isEmployerVerifiedCompletion()) {
+//            job.get().setStatus(JobStatus.VERIFIED_COMPLETION);
+//        }
+//
+//
+//    }
 //    @Override
 //    public JobResponse completeJob(CompleteJobRequest jobRequest){
 //

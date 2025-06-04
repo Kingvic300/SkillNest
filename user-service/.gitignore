@@ -6,11 +6,17 @@ target/
 
 /src/main/resources/secret.properties
 /src/test/resources/application-test.properties
+<<<<<<< Updated upstream
 .env
 application.properties
 secret.properties
 
 .env.*
+=======
+.env.*
+application.properties
+secret.properties
+>>>>>>> Stashed changes
 ### STS ###
 .apt_generated
 .classpath
@@ -20,6 +26,12 @@ secret.properties
 .springBeans
 .sts4-cache
 
+<<<<<<< Updated upstream
+=======
+../.env
+src/main/resources/application.properties/
+.env
+>>>>>>> Stashed changes
 ### IntelliJ IDEA ###
 .idea
 *.iws

@@ -1,10 +1,7 @@
 package com.skillnest.jobservice.data.model;
 
 import com.skillnest.jobservice.data.enums.JobStatus;
-<<<<<<< HEAD
 import lombok.Builder;
-=======
->>>>>>> master
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -15,10 +12,9 @@ import java.util.List;
 
 @Data
 @Document("job")
-<<<<<<< HEAD
+
 @Builder
-=======
->>>>>>> master
+
 public class Job {
     @Id
     private String id;

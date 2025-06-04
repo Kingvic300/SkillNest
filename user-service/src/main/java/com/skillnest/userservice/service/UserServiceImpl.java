@@ -226,6 +226,7 @@ public class UserServiceImpl implements UserService{
             user.setGoogleUser(true);
             user.setActive(true);
             user = userRepository.save(user);
+            System.out.println(user);
         }
 
 
